@@ -1,0 +1,1 @@
+# Пример работы с библиотекой https://github.com/google/tink
