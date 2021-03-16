@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import java.util.Base64;
 
 @Slf4j
 @SpringBootApplication
@@ -57,7 +59,7 @@ public class EncryptApplication implements CommandLineRunner {
         Aead aead = keysetHandle.getPrimitive(Aead.class);
         log.info("Text for encrypt [{}]", plainText);
         byte[] ciphertext = aead.encrypt(plainText.getBytes(StandardCharsets.UTF_8), null);
-        log.info("Encrypted text [{}]", new String(ciphertext));
+        log.info("Encrypted text [{}]", new String(Base64.getEncoder().encode(ciphertext), StandardCharsets.UTF_8));
         return ciphertext;
     }
 
@@ -67,6 +69,14 @@ public class EncryptApplication implements CommandLineRunner {
         KeysetHandle keysetHandle = CleartextKeysetHandle.read(JsonKeysetReader.withFile(new File(keysetFilename)));
 
         Aead aead = keysetHandle.getPrimitive(Aead.class);
+
+        final String base64PlainText = new String(Base64.getEncoder().encode(ciphertext), StandardCharsets.UTF_8);
+        log.info("Plain decrypt text [{}]", base64PlainText);
+
+        final byte[] bytes = Base64.getDecoder().decode(base64PlainText);
+        final boolean equals = Arrays.equals(ciphertext, bytes);
+        log.info("Eq two arr [{}]", equals);
+
         byte[] decrypted = aead.decrypt(ciphertext, null);
         log.info("Decrypt text [{}]", new String(decrypted));
         return decrypted;
